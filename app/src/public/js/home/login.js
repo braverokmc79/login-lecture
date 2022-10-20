@@ -11,7 +11,7 @@ function login() {
         psword: psword.value
     }
 
-    const result = fetch("/login", {
+    fetch("/login", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
