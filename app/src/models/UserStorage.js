@@ -37,6 +37,21 @@ class UserStorage {
         return userInfo;
     }
 
+    static save(userInfo) {
+        try {
+            const users = this.#users;
+            users.id.push(userInfo.id);
+            users.name.push(userInfo.name);
+            users.psword.push(userInfo.psword);
+
+            console.log("회원가입 :", users);
+            return { success: true, msg: "회원 가입을 축합니다." }
+        } catch (err) {
+            console.error("에러 : ", err);
+            return { success: false, msg: "회원 가입에 실패했습니다." }
+        }
+    }
+
 }
 
 
