@@ -54,7 +54,7 @@
   text-decoration: none;
 }
 .form .register-form {
-  display: none;
+  /* display: none; */
 }
 .container {
   position: relative;
