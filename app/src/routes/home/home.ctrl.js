@@ -19,11 +19,11 @@ const output = {
 
 const process = {
 
-    login: (req, res) => {
+    login: async (req, res) => {
         const user = new User(req.body);
-        const response = user.login();
+        const response = await user.login();
 
-        console.log("response  값은:", response);
+        console.log("user.login()  값은:", response);
         return res.json(response);
     },
 

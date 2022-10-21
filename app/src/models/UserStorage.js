@@ -1,12 +1,6 @@
 "use strict"
-const fs = require("fs");
+const fs = require("fs").promises;
 class UserStorage {
-
-    // static #users = {
-    //     id: ["test1", "test2", " test3"],
-    //     psword: ["1111", "1111", "1111"],
-    //     name: ["홍길동", "이순신", "강감찬"]
-    // }
 
     static getUsers(...fields) {
         // console.log("fields :", fields); //[id,psword, name]
@@ -24,30 +18,32 @@ class UserStorage {
         // return newUsers;
     }
 
-    static getUserInfo(id, cb) {
-        console.log("1. id", id);
+    static async getUserInfo(id) {
+        console.log(" getUserInfo(id) :  ", id);
 
-        fs.readFile("./src/databases/users.json", (err, data) => {
-            if (err) throw err;
+        return await fs.readFile("./src/databases/users.json").
+            then((data) => {
+                const users = JSON.parse(data);
+                const idx = users.id.indexOf(id);
 
-            const users = JSON.parse(data);
-            const idx = users.id.indexOf(id);
+                const userKeys = Object.keys(users);  //=>[id,psword, name] => 키값만 배열로 변환처리
 
-            const userKeys = Object.keys(users);  //=>[id,psword, name] => 키값만 배열로 변환처리
-            const userInfo = userKeys.reduce((newUser, info) => {
-                newUser[info] = users[info][idx];
-                return newUser;
+                console.log(" userKeys(id) :  ", userKeys);
 
-            }, {});
+                const userInfo = userKeys.reduce((newUser, info) => {
+                    console.log(" info : ", info);
+                    newUser[info] = users[info][idx];
+                    return newUser;
 
-            console.log("2.userInfo : ", userInfo);
-            setTimeout(function () {
-                cb(userInfo);
-            }, 100);
+                }, {});
 
-        });
+                return userInfo;
+
+            })
+            .catch(console.error);
 
     }
+
 
     static save(userInfo) {
         // try {
