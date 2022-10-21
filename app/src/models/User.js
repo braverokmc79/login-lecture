@@ -19,10 +19,16 @@ class User {
         return { success: false, msg: "존재하지 않는 아이디 입니다." };
     }
 
-    register() {
+    async register() {
         const client = this.body;
-        return UserStorage.save(client);
+        try {
+            return await UserStorage.save(client);
+        } catch (err) {
+            console.log("ㅇㅇ");
+        }
+
     }
+
 }
 
 module.exports = User;

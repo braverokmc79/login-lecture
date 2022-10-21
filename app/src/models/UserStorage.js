@@ -17,21 +17,28 @@ class UserStorage {
         return userInfo;
     }
 
-    static getUsers(...fields) {
-        // console.log("fields :", fields); //[id,psword, name]
-        // const users = this.#users;
+    static #getUsers(data, isAll, fields) {
+        const users = JSON.parse(data);
+        if (isAll) return users;
 
-        // const newUsers = fields.reduce((newUsers, field) => {
-
-        //     if (users.hasOwnProperty(field)) {
-        //         console.log(" users.hasOwnProperty(field) : ", users[field]);
-        //         newUsers[field] = users[field];
-        //     }
-        //     return newUsers
-        // }, {});
-
-        // return newUsers;
+        const newUsers = fields.reduce((newUsers, field) => {
+            if (users.hasOwnProperty(field)) {
+                console.log(" users.hasOwnProperty(field) : ", users[field]);
+                newUsers[field] = users[field];
+            }
+            return newUsers
+        }, {});
+        return newUsers;
     }
+
+
+    static getUsers(isAll, ...fields) {
+        console.log("fields :", fields); //[id,psword, name]
+        return fs.readFile("./src/databases/users.json").then((data) => {
+            return this.#getUsers(data, isAll, fields);
+        }).catch(console.error);
+    }
+
 
     static getUserInfo(id) {
         return fs.readFile("./src/databases/users.json").
@@ -42,19 +49,21 @@ class UserStorage {
     }
 
 
-    static save(userInfo) {
-        // try {
-        //     const users = this.#users;
-        //     users.id.push(userInfo.id);
-        //     users.name.push(userInfo.name);
-        //     users.psword.push(userInfo.psword);
+    static async save(userInfo) {
+        const users = await this.getUsers(true);
 
-        //     console.log("회원가입 :", users);
-        //     return { success: true, msg: "회원 가입을 축합니다." }
-        // } catch (err) {
-        //     console.error("에러 : ", err);
-        //     return { success: false, msg: "회원 가입에 실패했습니다." }
-        // }
+        console.log(" save  :", users);
+        if (users.id.includes(userInfo.id)) {
+            console.log(" 아이디 존재");
+            return { success: false, msg: "이미 존재하는 아이디입니다." };
+        }
+
+        users.id.includes(userInfo.id)
+        users.id.push(userInfo.id);
+        users.name.push(userInfo.name);
+        users.psword.push(userInfo.psword);
+        fs.writeFile("./src/databases/users.json", JSON.stringify(users));
+        return { success: true }
     }
 
 }
