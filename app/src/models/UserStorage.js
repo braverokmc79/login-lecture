@@ -2,6 +2,21 @@
 const fs = require("fs").promises;
 class UserStorage {
 
+    static #getUserInfo(data, id) {
+        const users = JSON.parse(data);
+        const idx = users.id.indexOf(id);
+
+        const userKeys = Object.keys(users);  //=>[id,psword, name] => 키값만 배열로 변환처리
+        console.log(" userKeys(id) :  ", userKeys);
+
+        const userInfo = userKeys.reduce((newUser, info) => {
+            console.log(" info : ", info);
+            newUser[info] = users[info][idx];
+            return newUser;
+        }, {});
+        return userInfo;
+    }
+
     static getUsers(...fields) {
         // console.log("fields :", fields); //[id,psword, name]
         // const users = this.#users;
@@ -18,30 +33,12 @@ class UserStorage {
         // return newUsers;
     }
 
-    static async getUserInfo(id) {
-        console.log(" getUserInfo(id) :  ", id);
-
-        return await fs.readFile("./src/databases/users.json").
+    static getUserInfo(id) {
+        return fs.readFile("./src/databases/users.json").
             then((data) => {
-                const users = JSON.parse(data);
-                const idx = users.id.indexOf(id);
-
-                const userKeys = Object.keys(users);  //=>[id,psword, name] => 키값만 배열로 변환처리
-
-                console.log(" userKeys(id) :  ", userKeys);
-
-                const userInfo = userKeys.reduce((newUser, info) => {
-                    console.log(" info : ", info);
-                    newUser[info] = users[info][idx];
-                    return newUser;
-
-                }, {});
-
-                return userInfo;
-
+                return this.#getUserInfo(data, id);
             })
             .catch(console.error);
-
     }
 
 
