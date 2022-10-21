@@ -21,12 +21,7 @@ class User {
 
     async register() {
         const client = this.body;
-        try {
-            return await UserStorage.save(client);
-        } catch (err) {
-            console.log("ㅇㅇ");
-        }
-
+        return await UserStorage.save(client);
     }
 
 }
