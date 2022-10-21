@@ -22,6 +22,8 @@ const process = {
     login: (req, res) => {
         const user = new User(req.body);
         const response = user.login();
+
+        console.log("response  값은:", response);
         return res.json(response);
     },
 
