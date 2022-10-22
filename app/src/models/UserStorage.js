@@ -1,5 +1,7 @@
 "use strict"
 const fs = require("fs").promises;
+const { rejects } = require("assert");
+const db = require("../config/db");
 class UserStorage {
 
     static #getUserInfo(data, id) {
@@ -40,12 +42,13 @@ class UserStorage {
     }
 
 
-    static getUserInfo(id) {
-        return fs.readFile("./src/databases/users.json").
-            then((data) => {
-                return this.#getUserInfo(data, id);
+    static async getUserInfo(id) {
+        return new Promise((resolove, rejects) => {
+            db.query("SELECT * FROM users WHERE id=?", [id], function (err, data) {
+                if (err) rejects(err);
+                resolove(data[0]);
             })
-            .catch(console.error);
+        });
     }
 
 
