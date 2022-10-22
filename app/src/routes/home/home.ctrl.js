@@ -24,7 +24,6 @@ const process = {
         const response = await user.login();
         return res.json(response);
     },
-    
 
     register: async (req, res) => {
         const user = new User(req.body);
