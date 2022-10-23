@@ -1,21 +1,17 @@
 //모듈
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
-const morgan = require('morgan')
-const app = express();
-const accessLogStream = require("./src/config/log");
-
 dotenv.config();
+const app = express();
 
 //라우터
 const home = require("./src/routes/home");
 
-
-
-
-// setup the logger
-app.use(morgan('combined', { stream: accessLogStream }))
+// const morgan = require('morgan');
+// const logger = require('./src/config/logger');
+// app.use(morgan("tiny", { stream: logger.stream })); // morgan 로그 설정
 
 
 //앱 셋팅
@@ -25,12 +21,9 @@ app.use(express.static(`${__dirname}/src/public`));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }))
 
-app.use(morgan('dev'));
-app.use(morgan('common', { stream: accessLogStream }));
 
 
 app.use("/", home); //use ->미들웨어를 등록해 주는 메소드.
-
 
 
 module.exports = app;

@@ -19,12 +19,14 @@ function login() {
         body: JSON.stringify(req)
     }).then(res => res.json())
         .then(res => {
-            console.log(res);
             if (res.success) {
                 location.href = "/";
             } else {
+                console.log(res);
                 alert(res.msg);
             }
-        }).catch(err => console.log(new Error("로그인 중 에러 발생")));
+        }).catch(err => {
+            console.log(new Error("로그인 중 에러 발생"));
+        });
 
 }

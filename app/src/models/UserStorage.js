@@ -1,6 +1,5 @@
 "use strict"
-const fs = require("fs").promises;
-const { rejects } = require("assert");
+//const fs = require("fs").promises;
 const db = require("../config/db");
 class UserStorage {
     /*
@@ -45,9 +44,9 @@ class UserStorage {
     static async getUserInfo(id) {
 
         return new Promise((resolove, rejects) => {
-            const query = "SELECT * FROM users WHERE id= ?";
+            const query = "SELECT * FROM users WHERE id= ? ";
             db.query(query, [id], function (err, data) {
-                if (err) rejects(err);
+                if (err) return rejects(err);
                 resolove(data.length === 0 ? false : data[0]);
             })
         });
@@ -60,7 +59,7 @@ class UserStorage {
         return new Promise((resolove, rejects) => {
             const query = "INSERT INTO users(id, name, psword) VALUES(?, ?,? ) ;";
             db.query(query, [id, name, psword], function (err) {
-                if (err) rejects(`${err}`);
+                if (err) return rejects(`${err}`);
                 resolove({ success: true });
             })
         });
