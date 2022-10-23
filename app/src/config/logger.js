@@ -1,100 +1,45 @@
-const winston = require("winston");
-const winstonDaily = require("winston-daily-rotate-file");
-const { combine, timestamp, printf, colorize, label } = winston.format;
 
-const logDir = "logs"; // logs 디렉토리 하위에 로그 파일 저장
-
-const logFormat = printf((info) => {
-    return `${info.timestamp} ${info.level}: ${info.message}`;
-});
+const winstonLog = require("./winston.log");
+const parseurl = require('parseurl');
 
 
-const productionWinstonDail = [
-    new winstonDaily({
-        level: "warn",
-        datePattern: "YYYY-MM-DD",
-        dirname: logDir + "/warn",
-        filename: `%DATE%.warn.log`, // file 이름 날짜로 저장
-        maxFiles: 30, // 30일치 로그 파일 저장
-        zippedArchive: true,
-    }),
-    // error 레벨 로그를 저장할 파일 설정
-    new winstonDaily({
-        level: "error",
-        datePattern: "YYYY-MM-DD",
-        dirname: logDir + "/error", // error.log 파일은 /logs/error 하위에 저장
-        filename: `%DATE%.error.log`,
-        maxFiles: 30,
-        zippedArchive: true,
-    })
-]
+//로그 처리 및 결과값 반환처리
+const logger = (response, req, res) => {
+    const url = {
+        method: req.method,
+        path: parseurl(req).pathname,
+        status: (response !== null ? response.err : false) ? 400 : 200,
+    };
 
-const devWinstonDail = [...productionWinstonDail];
-devWinstonDail.push(    // info 레벨 로그를 저장할 파일 설정
-    new winstonDaily({
-        level: "info",
-        datePattern: "YYYY-MM-DD",
-        dirname: logDir + "/info",
-        filename: `%DATE%.info.log`, // file 이름 날짜로 저장
-        maxFiles: 30, // 30일치 로그 파일 저장
-        zippedArchive: true,
-    }));
+    if (response === null) {
+        winstonLog.info(`${url.method} |  ${url.path} 화면 | Request Query : ${JSON.stringify(req.query)} `);
+        return;
+    }
 
-/*
- * Log Level
- * error: 0, warn: 1, info: 2, http: 3, verbose: 4, debug: 5, silly: 6
- */
-const logger = winston.createLogger({
-    format: combine(
-        timestamp({
-            format: "YYYY-MM-DD HH:mm:ss",
-        }),
-        logFormat
-    ),
+    let result = false;
 
-    transports: process.env.NODE_ENV !== "production" ? devWinstonDail : productionWinstonDail
-});
+    if (response.err) {
+        winstonLog.error(
+            `${url.method} ${url.path} ${url.status} Response: ${response.success} | Request Body : ${JSON.stringify(req.body)}  |  msg | ${response.err}`
+        );
 
-logger.stream = {
-    // morgan wiston 설정
-    write: (message) => {
-        logger.info(message);
-    },
+        result = true;
+    } else {
+
+        if (url.method === "GET") {
+            winstonLog.info(`${url.method} |  ${url.path} 화면 | Request Query : ${JSON.stringify(req.query)}  |   msg | ${response.msg || ""}  `);
+
+        } else {
+            winstonLog.info(
+                `${url.method} ${url.path} ${url.status} Response: ${response.success}  | Request Body : ${JSON.stringify(req.body)}  |   msg | ${response.msg || ""}`
+            );
+        }
+        result = false;
+    }
+
+    if (result) return res.status(400).json({ msg: response.err.toString() });
+    return res.status(200).json(response);
 };
-
-// Production 환경이 아닌 경우(dev 등) 배포 환경에서는 
-// 최대한 자원을 안잡아 먹는 로그를 출력해야함
-if (process.env.NODE_ENV !== "production") {
-    logger.add(
-        // new winston.transports.Console({
-        //     format: combine(
-        //         colorize({ all: true }), // console 에 출력할 로그 컬러 설정 적용함
-        //         logFormat // log format 적용
-        //     ),
-        // });
-
-        new winston.transports.Console({
-            name: 'debug-console',
-            colorize: true,
-            level: "debug",
-            format: combine(
-                label({ label: '백엔드 맛보기' }),
-                colorize(),
-                timestamp({
-                    format: "YYYY-MM-DD HH:mm:ss"
-                }),
-                printf(
-                    info => `${info.timestamp} | [${info.label}] | (${info.level}) :  ${info.message} `
-                )
-            ),
-            showlevel: true,
-            json: false,
-        })
-    );
-}
 
 
 module.exports = logger;
-
-
-
